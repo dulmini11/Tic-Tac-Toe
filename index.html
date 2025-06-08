@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Game</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css?family=Varela+Round&display=swap");
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #f8a126;
+            --secondary-color: #8d185e;
+            --white-color: #fff;
+            --hover-color: #e07b23;
+            --border-color: #f8a1267a;
+            --bright-blue: #2f76ff;
+            --raspberry-red: #e12472;
+        }
+
+        body {
+            font-family: "Varela Round", sans-serif;
+            min-height: 100vh;
+            color: var(--white-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+        }
+
+        /* Video background container */
+        .video-bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .bg-video-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .bg-video-wrapper.active {
+            opacity: 1;
+        }
+
+        .bg-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+
+        /* Corner navigation arrows */
+        .nav-arrow {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--white-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .nav-arrow:hover {
+            background: var(--primary-color);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 15px rgba(248, 161, 38, 0.4);
+        }
+
+        .nav-arrow.left {
+            left: 20px;
+        }
+
+        .nav-arrow.right {
+            right: 20px;
+        }
+
+        /* Background indicator in top corner */
+        .bg-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--white-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .container {
+            border: 2px solid var(--border-color);
+            padding: 40px;
+            border-radius: 10px;
+            backdrop-filter: blur(15px);
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 28px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .mode-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .mode-buttons button {
+            margin: 0;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .mode-buttons button.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        .game-mode-indicator {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .game-message {
+            color: var(--primary-color);
+            font-size: 20px;
+            font-weight: 600;
+            height: 56px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-message span {
+            color: var(--white-color);
+            background: var(--primary-color);
+            display: inline-flex;
+            width: 30px;
+            height: 30px;
+            justify-content: center;
+            align-items: center;
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .cell{
+            font-size: 90px;
+            background-color: #00000045;
+            height: 100px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cell:hover{
+            background-color: #00000060;
+        }
+
+        .cell.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .cell-O{
+            text-shadow: 0 0 10px var(--raspberry-red),0 0 20px var(--raspberry-red), 0 0 30px var(--raspberry-red);
+        }
+
+        .cell-X{
+            text-shadow: 0 0 10px var(--bright-blue),0 0 20px var(--bright-blue), 0 0 30px var(--bright-blue);
+        }
+
+        :is(.cell-O, .cell-X):hover{
+            background-color: #00000045;
+        }
+
+        .cell.correct{
+            background-color: #00000045;
+        }
+
+        .cell.correct:hover{
+            background-color: #00000096;
+        }
+
+        .cell.correct {
+            background-color: rgba(248, 161, 38, 0.3);
+            border-color: var(--primary-color);
+            animation: winner-glow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes winner-glow {
+            from {
+                box-shadow: 0 0 10px var(--primary-color);
+            }
+            to {
+                box-shadow: 0 0 20px var(--primary-color), 0 0 30px var(--primary-color);
+            }
+        }
+
+        .cell.correct:hover {
+            background-color: rgba(248, 161, 38, 0.4);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            font-size: 20px;
+            margin: 20px auto 0;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .game-board {
+                grid-template-columns: repeat(3, 80px);
+                grid-template-rows: repeat(3, 80px);
+                gap: 8px;
+            }
+
+            .cell {
+                height: 80px;
+                font-size: 60px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .game-message {
+                font-size: 18px;
+            }
+
+            button {
+                font-size: 18px;
+                padding: 10px 20px;
+            }
+
+            .mode-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .game-board {
+                grid-template-columns: repeat(3, 60px);
+                grid-template-rows: repeat(3, 60px);
+                gap: 6px;
+            }
+
+            .cell {
+                height: 60px;
+                font-size: 45px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .game-message {
+                font-size: 16px;
+            }
+
+            button {
+                font-size: 16px;
+                padding: 8px 16px;
+            }
+
+            .nav-arrow {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .nav-arrow.left {
+                left: 10px;
+            }
+
+            .nav-arrow.right {
+                right: 10px;
+            }
+
+            .bg-indicator {
+                top: 10px;
+                right: 10px;
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Video background container -->
+    <div class="video-bg-container">
+        <div class="bg-video-wrapper bg-1" id="bg-1">
+            <video class="bg-video" autoplay muted loop playsinline>
+                <source src="wall1.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <div class="bg-video-wrapper bg-2" id="bg-2">
+            <video class="bg-video" autoplay muted loop playsinline>
+                <source src="wall2.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <div class="bg-video-wrapper bg-3" id="bg-3">
+            <video class="bg-video" autoplay muted loop playsinline>
+                <source src="wall3.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <div class="bg-video-wrapper bg-4" id="bg-4">
+            <video class="bg-video" autoplay muted loop playsinline>
+                <source src="wall4.mp4" type="video/mp4">
+            </video>
+        </div>
+
+        <div class="bg-video-wrapper bg-5" id="bg-5">
+            <video class="bg-video" autoplay muted loop playsinline>
+                <source src="wall5.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="bg-video-wrapper bg-6" id="bg-6">
+            <video class="bg-video" autoplay muted loop playsinline>
+                <source src="wall6.mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>
+
+    <div class="nav-arrow left" onclick="previousBackground()">‹</div>
+    <div class="nav-arrow right" onclick="nextBackground()">›</div>
+    <div class="bg-indicator" id="bg-indicator">Background 1/6</div>
+
+    <div class="container">
+        <h1>🎮 Tic Tac Toe 🎮</h1>
+        
+        <div class="mode-buttons">
+            <button id="one-player-btn" onclick="setMode('one')">🤖 vs Computer</button>
+            <button id="two-player-btn" onclick="setMode('two')" class="active">👥 2 Players</button>
+        </div>
+
+        <div class="game-mode-indicator" id="mode-indicator">2 Player Mode</div>
+        <div class="game-message">Who's Turn: <span>X</span></div>
+
+        <div class="game-board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+
+        <button id="reset-button">🔄 Reset Game</button>
+    </div>
+
+    <script>
+        const EGameStatus = {
+            NOT_STARTED: "NOT_STARTED",
+            IN_PROGRESS: "IN_PROGRESS",
+            FINISHED_WITH_WINNER: "FINISHED_WITH_WINNER",
+            FINISHED_WITH_TIE: "FINISHED_WITH_TIE",
+        };
+
+        const EGameMode = {
+            ONE_PLAYER: "ONE_PLAYER",
+            TWO_PLAYER: "TWO_PLAYER"
+        };
+
+        let gameStatus = EGameStatus.NOT_STARTED;
+        let gameMode = EGameMode.TWO_PLAYER;
+        let currentPlayer = "X";
+        let currentBackground = 1;
+        const totalBackgrounds = 6;
+        const humanPlayer = "X";
+        const computerPlayer = "O";
+        
+        const cells = document.querySelectorAll(".cell");
+        const resetButton = document.getElementById("reset-button");
+        const gameMessage = document.querySelector(".game-message");
+        const bgIndicator = document.getElementById("bg-indicator");
+        const modeIndicator = document.getElementById("mode-indicator");
+        const onePlayerBtn = document.getElementById("one-player-btn");
+        const twoPlayerBtn = document.getElementById("two-player-btn");
+
+        updateGameMessage();
+        resetButton.addEventListener("click", reset);
+        cells.forEach((cell, index) => cell.addEventListener("click", () => handleCellClick(index)));
+
+        function setMode(mode) {
+            if (mode === 'one') {
+                gameMode = EGameMode.ONE_PLAYER;
+                modeIndicator.textContent = "vs Computer Mode";
+                onePlayerBtn.classList.add('active');
+                twoPlayerBtn.classList.remove('active');
+            } else {
+                gameMode = EGameMode.TWO_PLAYER;
+                modeIndicator.textContent = "2 Player Mode";
+                twoPlayerBtn.classList.add('active');
+                onePlayerBtn.classList.remove('active');
+            }
+            reset();
+        }
+
+        function handleCellClick(index) {
+            if (isGameFinished() || cells[index].innerHTML !== "") {
+                return;
+            }
+
+            // In one player mode, only allow human player (X) to make moves via click
+            if (gameMode === EGameMode.ONE_PLAYER && currentPlayer !== humanPlayer) {
+                return;
+            }
+
+            makeMove(index, currentPlayer);
+
+            if (checkWinner()) {
+                gameStatus = EGameStatus.FINISHED_WITH_WINNER;
+                updateGameMessage();
+                return;
+            }
+
+            if (checkTie()) {
+                gameStatus = EGameStatus.FINISHED_WITH_TIE;
+                updateGameMessage();
+                return;
+            }
+
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+            updateGameMessage();
+
+            // If it's one player mode and now it's computer's turn
+            if (gameMode === EGameMode.ONE_PLAYER && currentPlayer === computerPlayer) {
+                // Add a small delay for better UX
+                setTimeout(() => {
+                    makeComputerMove();
+                }, 500);
+            }
+        }
+
+        function makeMove(index, player) {
+            gameStatus = EGameStatus.IN_PROGRESS;
+            cells[index].innerHTML = player;
+            cells[index].classList.add("cell-" + player);
+        }
+
+        function makeComputerMove() {
+            if (isGameFinished()) return;
+
+            const bestMove = getBestMove();
+            if (bestMove !== -1) {
+                makeMove(bestMove, computerPlayer);
+
+                if (checkWinner()) {
+                    gameStatus = EGameStatus.FINISHED_WITH_WINNER;
+                    updateGameMessage();
+                    return;
+                }
+
+                if (checkTie()) {
+                    gameStatus = EGameStatus.FINISHED_WITH_TIE;
+                    updateGameMessage();
+                    return;
+                }
+
+                currentPlayer = humanPlayer;
+                updateGameMessage();
+            }
+        }
+
+        function getBestMove() {
+            // Get available moves
+            const availableMoves = [];
+            cells.forEach((cell, index) => {
+                if (cell.innerHTML === "") {
+                    availableMoves.push(index);
+                }
+            });
+
+            if (availableMoves.length === 0) return -1;
+
+            // Check if computer can win
+            for (let move of availableMoves) {
+                const tempBoard = getBoardState();
+                tempBoard[move] = computerPlayer;
+                if (isWinningBoard(tempBoard, computerPlayer)) {
+                    return move;
+                }
+            }
+
+            // Check if computer needs to block human from winning
+            for (let move of availableMoves) {
+                const tempBoard = getBoardState();
+                tempBoard[move] = humanPlayer;
+                if (isWinningBoard(tempBoard, humanPlayer)) {
+                    return move;
+                }
+            }
+
+            // Try to take center
+            if (availableMoves.includes(4)) {
+                return 4;
+            }
+
+            // Try to take corners
+            const corners = [0, 2, 6, 8];
+            const availableCorners = corners.filter(corner => availableMoves.includes(corner));
+            if (availableCorners.length > 0) {
+                return availableCorners[Math.floor(Math.random() * availableCorners.length)];
+            }
+
+            // Take any available move
+            return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+        }
+
+        function getBoardState() {
+            return Array.from(cells).map(cell => cell.innerHTML);
+        }
+
+        function isWinningBoard(board, player) {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+                [0, 4, 8], [2, 4, 6], // diagonals
+            ];
+
+            return winPatterns.some(pattern => {
+                const [a, b, c] = pattern;
+                return board[a] === player && board[b] === player && board[c] === player;
+            });
+        }
+
+        function checkWinner() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+                [0, 4, 8], [2, 4, 6], // diagonals
+            ];
+
+            for (const pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (
+                    cells[a].innerHTML !== "" &&
+                    cells[a].innerHTML === cells[b].innerHTML &&
+                    cells[a].innerHTML === cells[c].innerHTML
+                ) {
+                    updateCellsWinners(cells[a], cells[b], cells[c]);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function updateCellsWinners(cellA, cellB, cellC) {
+            cellA.classList.add("correct");
+            cellB.classList.add("correct");
+            cellC.classList.add("correct");
+        }
+
+        function checkTie() {
+            return Array.from(cells).every((cell) => cell.innerHTML !== "");
+        }
+
+        function reset() {
+            gameStatus = EGameStatus.NOT_STARTED;
+            currentPlayer = "X";
+            updateGameMessage();
+            cells.forEach((cell) => {
+                cell.innerHTML = "";
+                cell.className = "cell";
+            });
+        }
+
+        function updateGameMessage() {
+            if (gameStatus === EGameStatus.FINISHED_WITH_TIE) {
+                gameMessage.innerHTML = "🤝 It's a tie!";
+            } else if (gameStatus === EGameStatus.FINISHED_WITH_WINNER) {
+                if (gameMode === EGameMode.ONE_PLAYER) {
+                    if (currentPlayer === humanPlayer) {
+                        gameMessage.innerHTML = `🎉 You Win!`;
+                    } else {
+                        gameMessage.innerHTML = `🤖 Computer Wins!`;
+                    }
+                } else {
+                    gameMessage.innerHTML = `🎉 Winner: <span>${currentPlayer}</span>`;
+                }
+            } else {
+                if (gameMode === EGameMode.ONE_PLAYER) {
+                    if (currentPlayer === humanPlayer) {
+                        gameMessage.innerHTML = `Your Turn: <span>${currentPlayer}</span>`;
+                    } else {
+                        gameMessage.innerHTML = `Computer's Turn: <span>${currentPlayer}</span>`;
+                    }
+                } else {
+                    gameMessage.innerHTML = `Who's Turn: <span>${currentPlayer}</span>`;
+                }
+            }
+        }
+
+        function isGameFinished() {
+            return gameStatus === EGameStatus.FINISHED_WITH_TIE ||
+                   gameStatus === EGameStatus.FINISHED_WITH_WINNER;
+        }
+
+        function changeBackground(bgNumber) {
+            // Hide all video backgrounds
+            document.querySelectorAll('.bg-video-wrapper').forEach(wrapper => {
+                wrapper.classList.remove('active');
+            });
+            
+            // Show the selected background
+            const selectedBg = document.getElementById(`bg-${bgNumber}`);
+            if (selectedBg) {
+                selectedBg.classList.add('active');
+            }
+            
+            // Update current background number
+            currentBackground = bgNumber;
+            
+            // Update indicator
+            updateBackgroundIndicator();
+        }
+
+        function nextBackground() {
+            const next = currentBackground >= totalBackgrounds ? 1 : currentBackground + 1;
+            changeBackground(next);
+        }
+
+        function previousBackground() {
+            const prev = currentBackground <= 1 ? totalBackgrounds : currentBackground - 1;
+            changeBackground(prev);
+        }
+
+        function updateBackgroundIndicator() {
+            bgIndicator.textContent = `Background ${currentBackground}/${totalBackgrounds}`;
+        }
+
+        // Set default background on load
+        window.addEventListener('load', function() {
+            changeBackground(1); // Start with first background
+        });
+    </script>
+</body>
+</html>
