@@ -482,6 +482,133 @@
                 font-size: 12px;
             }
         }
+
+        /* Additional mobile optimizations */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+                margin: 5px;
+                border-width: 1px;
+            }
+
+            .nav-arrow {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .nav-arrow.left {
+                left: 5px;
+            }
+
+            .nav-arrow.right {
+                right: 5px;
+            }
+
+            .time-input {
+                width: 50px;
+                padding: 8px 6px;
+                font-size: 14px;
+            }
+
+            .game-board {
+                gap: 4px;
+                max-width: 200px;
+            }
+
+            .timer-controls {
+                gap: 8px;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                min-width: 70px;
+            }
+        }
+
+        /* Landscape orientation adjustments */
+        @media (orientation: landscape) and (max-height: 600px) {
+            body {
+                align-items: flex-start;
+                padding-top: 20px;
+            }
+
+            .container {
+                margin-top: 10px;
+            }
+
+            .timer-display {
+                width: clamp(120px, 25vw, 160px);
+                height: clamp(120px, 25vw, 160px);
+            }
+
+            h1 {
+                margin-bottom: 15px;
+            }
+        }
+
+        /* High DPI display optimization */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .timer-circle-progress,
+            .timer-circle-bg {
+                stroke-width: 4;
+            }
+        }
+
+        /* Mobile video optimization */
+        @media (max-width: 768px) {
+            .video-bg-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: 100vw;
+                height: 100vh;
+            }
+            
+            .bg-video {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                object-fit: cover;
+                transform: none;
+            }
+        }
+
+        /* Mobile timer circle optimization */
+        @media (max-width: 768px) {
+            .timer-display {
+                width: 120px;
+                height: 120px;
+            }
+
+            .timer-circle {
+                width: 120px;
+                height: 120px;
+            }
+
+            .timer-circle svg {
+                width: 120px;
+                height: 120px;
+            }
+
+            .timer-circle-bg {
+                cx: 60;
+                cy: 60;
+                r: 50;
+                stroke-width: 4;
+            }
+
+            .timer-circle-progress {
+                cx: 60;
+                cy: 60;
+                r: 50;
+                stroke-width: 4;
+            }
+        }
     </style>
 </head>
 <body>
