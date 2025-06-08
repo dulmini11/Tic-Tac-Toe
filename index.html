@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic Tac Toe Game</title>
-
-        <style>
+    <title>Study Timer with Tic Tac Toe</title>
+    
+    <style>
         @import url("https://fonts.googleapis.com/css?family=Varela+Round&display=swap");
 
         *, *::before, *::after {
@@ -22,6 +22,8 @@
             --border-color: #f8a1267a;
             --bright-blue: #2f76ff;
             --raspberry-red: #e12472;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
         }
 
         body {
@@ -125,26 +127,169 @@
         .container {
             border: 2px solid var(--border-color);
             padding: 40px;
-            border-radius: 10px;
-            backdrop-filter: blur(15px);
-            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            align-items: center;
+            min-width: 400px;
+            background: none;
+            backdrop-filter: none;
+            box-shadow: none;
         }
+
 
         h1 {
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 28px;
+            margin-bottom: 30px;
+            font-size: 32px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Study Timer Styles */
+        .timer-section {
+            text-align: center;
+            width: 100%;
+        }
+
+        .time-input-section {
+            margin-bottom: 30px;
+        }
+
+        .time-input {
+            padding: 12px;
+            font-size: 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: rgba(27, 27, 27, 0.318);
+            color: var(--white-color);
+            text-align: center;
+            width: 100px;
+            margin: 0 5px;
+        }
+
+        .time-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .timer-display {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 30px auto;
+        }
+
+        .timer-circle {
+            width: 200px;
+            height: 200px;
+            position: relative;
+        }
+
+        .timer-circle svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .timer-circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.2);
+            stroke-width: 6;
+        }
+
+        .timer-circle-progress {
+            fill: none;
+            stroke: var(--primary-color);
+            stroke-width: 6;
+            stroke-linecap: round;
+            transition: stroke-dasharray 1s linear;
+        }
+
+        .timer-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            font-size: 16px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: 600;
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:disabled {
+            background-color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #7c2d54;
+        }
+
+        /* Game Section Styles */
+        .game-section {
+            display: none;
+            width: 100%;
+            text-align: center;
+        }
+
+        .game-section.active {
+            display: block;
         }
 
         .mode-buttons {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .mode-buttons button {
@@ -154,6 +299,7 @@
             border: 2px solid var(--border-color);
             background: rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
+            border-radius: 8px;
         }
 
         .mode-buttons button.active {
@@ -179,6 +325,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-bottom: 20px;
         }
 
         .game-message span {
@@ -195,27 +342,29 @@
 
         .game-board {
             display: grid;
-            grid-template-columns: repeat(3, 100px);
-            grid-template-rows: repeat(3, 100px);
-            gap: 10px;
-            margin: 20px 0;
+            grid-template-columns: repeat(3, 80px);
+            grid-template-rows: repeat(3, 80px);
+            gap: 8px;
+            margin: 20px auto;
+            justify-content: center;
         }
 
-        .cell{
-            font-size: 90px;
-            background-color: #00000045;
-            height: 100px;
-            margin-bottom: 10px;
-            border-radius: 5px;
+        .cell {
+            font-size: 60px;
+            background-color: rgba(0, 0, 0, 0.3);
+            height: 80px;
+            border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            border: 2px solid transparent;
         }
 
-        .cell:hover{
-            background-color: #00000060;
+        .cell:hover {
+            background-color: rgba(0, 0, 0, 0.4);
+            border-color: var(--border-color);
         }
 
         .cell.disabled {
@@ -223,11 +372,12 @@
             opacity: 0.6;
         }
 
-        .cell-O{
-            text-shadow: 0 0 10px var(--raspberry-red),0 0 20px var(--raspberry-red), 0 0 30px var(--raspberry-red);
+        .cell-O {
+            color: var(--raspberry-red);
+            text-shadow: 0 0 10px var(--raspberry-red);
         }
 
-        .cell-X{
+               .cell-X{
             text-shadow: 0 0 10px var(--bright-blue),0 0 20px var(--bright-blue), 0 0 30px var(--bright-blue);
         }
 
@@ -258,89 +408,56 @@
             }
         }
 
-        .cell.correct:hover {
-            background-color: rgba(248, 161, 38, 0.4);
+        /* Status Messages */
+        .status-message {
+            text-align: center;
+            font-size: 18px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
         }
 
-        button {
-            background-color: var(--primary-color);
-            color: var(--white-color);
-            font-size: 20px;
-            margin: 20px auto 0;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;
-            font-weight: 600;
+        .status-success {
+            border-color: var(--success-color);
+            color: var(--success-color);
         }
 
-        button:hover {
-            background-color: var(--hover-color);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        .status-warning {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
         }
 
         /* Responsive Design */
         @media (max-width: 600px) {
             .container {
                 padding: 20px;
+                min-width: 300px;
             }
             
-            .game-board {
-                grid-template-columns: repeat(3, 80px);
-                grid-template-rows: repeat(3, 80px);
-                gap: 8px;
-            }
-
-            .cell {
-                height: 80px;
-                font-size: 60px;
-            }
-
             h1 {
                 font-size: 24px;
             }
 
-            .game-message {
-                font-size: 18px;
+            .timer-display {
+                width: 150px;
+                height: 150px;
             }
 
-            button {
-                font-size: 18px;
-                padding: 10px 20px;
+            .timer-circle {
+                width: 150px;
+                height: 150px;
             }
 
-            .mode-buttons {
-                flex-direction: column;
-                gap: 10px;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .game-board {
-                grid-template-columns: repeat(3, 60px);
-                grid-template-rows: repeat(3, 60px);
-                gap: 6px;
-            }
-
-            .cell {
-                height: 60px;
-                font-size: 45px;
-            }
-
-            h1 {
+            .timer-text {
                 font-size: 20px;
             }
 
-            .game-message {
-                font-size: 16px;
-            }
-
-            button {
-                font-size: 16px;
-                padding: 8px 16px;
+            .btn {
+                font-size: 14px;
+                padding: 10px 20px;
+                min-width: 100px;
             }
 
             .nav-arrow {
@@ -365,10 +482,9 @@
             }
         }
     </style>
-        
 </head>
 <body>
-
+    <!-- Background container -->
     <div class="video-bg-container">
         <div class="bg-video-wrapper bg-1" id="bg-1">
             <video class="bg-video" autoplay muted loop playsinline>
@@ -406,37 +522,90 @@
         </div>
     </div>
 
+    <!-- Navigation arrows -->
     <div class="nav-arrow left" onclick="previousBackground()">‹</div>
     <div class="nav-arrow right" onclick="nextBackground()">›</div>
     <div class="bg-indicator" id="bg-indicator">Background 1/6</div>
 
     <div class="container">
-        <h1>🎮 Tic Tac Toe 🎮</h1>
-        
-        <div class="mode-buttons">
-            <button id="one-player-btn" onclick="setMode('one')">🤖 vs Computer</button>
-            <button id="two-player-btn" onclick="setMode('two')" class="active">👥 2 Players</button>
+        <!-- Study Timer Section -->
+        <div class="timer-section" id="timer-section">
+            <h1>Study Timer</h1>
+            
+            <div class="time-input-section">
+                <input type="number" class="time-input" id="hours" placeholder="0" min="0" max="23">
+                <span>h</span>
+                <input type="number" class="time-input" id="minutes" placeholder="25" min="0" max="59">
+                <span>m</span>
+                <input type="number" class="time-input" id="seconds" placeholder="0" min="0" max="59">
+                <span>s</span>
+            </div>
+
+            <div class="timer-display">
+                <div class="timer-circle">
+                    <svg>
+                        <circle class="timer-circle-bg" cx="100" cy="100" r="90"></circle>
+                        <circle class="timer-circle-progress" cx="100" cy="100" r="90" 
+                                stroke-dasharray="565.48" stroke-dashoffset="565.48" id="progress-circle"></circle>
+                    </svg>
+                </div>
+                <div class="timer-text" id="timer-display">25:00</div>
+            </div>
+
+            <div class="timer-controls">
+                <button class="btn btn-success" id="start-btn" onclick="startTimer()">▶️ Start</button>
+                <button class="btn btn-danger" id="pause-btn" onclick="pauseTimer()" disabled>⏸️ Pause</button>
+                <button class="btn btn-secondary" id="reset-btn" onclick="resetTimer()">🔄 Reset</button>
+                <button class="btn" id="break-btn" onclick="showGame()" disabled>🎮 Take a Break</button>
+            </div>
+
+            <div class="status-message" id="status-message" style="display: none;"></div>
         </div>
 
-        <div class="game-mode-indicator" id="mode-indicator">2 Player Mode</div>
-        <div class="game-message">Who's Turn: <span>X</span></div>
+        <!-- Tic Tac Toe Game Section -->
+        <div class="game-section" id="game-section">
+            <h1>🎮 Tic Tac Toe Break</h1>
+            
+            <div class="mode-buttons">
+                <button id="one-player-btn" onclick="setMode('one')">🤖 vs Computer</button>
+                <button id="two-player-btn" onclick="setMode('two')" class="active">👥 2 Players</button>
+            </div>
 
-        <div class="game-board">
-            <div class="cell" data-index="0"></div>
-            <div class="cell" data-index="1"></div>
-            <div class="cell" data-index="2"></div>
-            <div class="cell" data-index="3"></div>
-            <div class="cell" data-index="4"></div>
-            <div class="cell" data-index="5"></div>
-            <div class="cell" data-index="6"></div>
-            <div class="cell" data-index="7"></div>
-            <div class="cell" data-index="8"></div>
+            <div class="game-mode-indicator" id="mode-indicator">2 Player Mode</div>
+            <div class="game-message" id="game-message">Who's Turn: <span>X</span></div>
+
+            <div class="game-board">
+                <div class="cell" data-index="0"></div>
+                <div class="cell" data-index="1"></div>
+                <div class="cell" data-index="2"></div>
+                <div class="cell" data-index="3"></div>
+                <div class="cell" data-index="4"></div>
+                <div class="cell" data-index="5"></div>
+                <div class="cell" data-index="6"></div>
+                <div class="cell" data-index="7"></div>
+                <div class="cell" data-index="8"></div>
+            </div>
+
+            <div class="timer-controls">
+                <button class="btn btn-secondary" id="reset-game-btn" onclick="resetGame()">🔄 Reset Game</button>
+                <button class="btn btn-success" id="back-to-study-btn" onclick="backToStudy()">📚 Back to Study</button>
+            </div>
         </div>
-
-        <button id="reset-button">🔄 Reset Game</button>
     </div>
 
-        <script>
+    <script>
+        // Timer variables
+        let timerInterval;
+        let totalSeconds = 25 * 60; // Default 25 minutes
+        let currentSeconds = totalSeconds;
+        let isRunning = false;
+        let isPaused = false;
+
+        // Background variables
+        let currentBackground = 1;
+        const totalBackgrounds = 6;
+
+        // Game variables
         const EGameStatus = {
             NOT_STARTED: "NOT_STARTED",
             IN_PROGRESS: "IN_PROGRESS",
@@ -452,22 +621,152 @@
         let gameStatus = EGameStatus.NOT_STARTED;
         let gameMode = EGameMode.TWO_PLAYER;
         let currentPlayer = "X";
-        let currentBackground = 1;
-        const totalBackgrounds = 6;
         const humanPlayer = "X";
         const computerPlayer = "O";
-        
+
+        // DOM elements
+        const timerSection = document.getElementById('timer-section');
+        const gameSection = document.getElementById('game-section');
+        const timerDisplay = document.getElementById('timer-display');
+        const progressCircle = document.getElementById('progress-circle');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const breakBtn = document.getElementById('break-btn');
+        const statusMessage = document.getElementById('status-message');
+        const bgIndicator = document.getElementById('bg-indicator');
+
+        // Game elements
         const cells = document.querySelectorAll(".cell");
-        const resetButton = document.getElementById("reset-button");
-        const gameMessage = document.querySelector(".game-message");
-        const bgIndicator = document.getElementById("bg-indicator");
+        
+        const gameMessage = document.getElementById("game-message");
         const modeIndicator = document.getElementById("mode-indicator");
         const onePlayerBtn = document.getElementById("one-player-btn");
         const twoPlayerBtn = document.getElementById("two-player-btn");
 
-        updateGameMessage();
-        resetButton.addEventListener("click", reset);
+        // Initialize
+        updateTimerDisplay();
+        updateProgressCircle();
         cells.forEach((cell, index) => cell.addEventListener("click", () => handleCellClick(index)));
+
+        // Timer Functions
+        function startTimer() {
+            if (!isRunning && !isPaused) {
+                // Get time from inputs
+                const hours = parseInt(document.getElementById('hours').value) || 0;
+                const minutes = parseInt(document.getElementById('minutes').value) || 25;
+                const seconds = parseInt(document.getElementById('seconds').value) || 0;
+                
+                totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                currentSeconds = totalSeconds;
+            }
+
+            if (totalSeconds <= 0) {
+                showStatus('Please set a valid time!', 'warning');
+                return;
+            }
+
+            isRunning = true;
+            isPaused = false;
+            updateButtonStates();
+            
+            timerInterval = setInterval(() => {
+                currentSeconds--;
+                updateTimerDisplay();
+                updateProgressCircle();
+                
+                if (currentSeconds <= 0) {
+                    timerComplete();
+                }
+            }, 1000);
+
+            showStatus('Timer started! Focus on your studies.', 'success');
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            isPaused = true;
+            updateButtonStates();
+            showStatus('Timer paused. Take a moment to breathe.', 'warning');
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            isPaused = false;
+            currentSeconds = totalSeconds;
+            updateTimerDisplay();
+            updateProgressCircle();
+            updateButtonStates();
+            hideStatus();
+        }
+
+        function timerComplete() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            isPaused = false;
+            updateButtonStates();
+            showStatus('🎉 Study session complete! Great job!', 'success');
+            
+            // Optional: Play notification sound or show more prominent alert
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('Study Session Complete!', {
+                    body: 'Time for a well-deserved break!',
+                    icon: '📚'
+                });
+            }
+        }
+
+        function updateTimerDisplay() {
+            const hours = Math.floor(currentSeconds / 3600);
+            const minutes = Math.floor((currentSeconds % 3600) / 60);
+            const seconds = currentSeconds % 60;
+            
+            let display = '';
+            if (hours > 0) {
+                display = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            timerDisplay.textContent = display;
+        }
+
+        function updateProgressCircle() {
+            const circumference = 2 * Math.PI * 90; // radius = 90
+            const progress = totalSeconds > 0 ? (currentSeconds / totalSeconds) : 0;
+            const offset = circumference * (1 - progress);
+            progressCircle.style.strokeDashoffset = offset;
+        }
+
+        function updateButtonStates() {
+            startBtn.disabled = isRunning;
+            pauseBtn.disabled = !isRunning;
+            breakBtn.disabled = isRunning;
+        }
+
+        function showStatus(message, type = 'success') {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message status-${type}`;
+            statusMessage.style.display = 'block';
+        }
+
+        function hideStatus() {
+            statusMessage.style.display = 'none';
+        }
+
+        // Game Functions
+        function showGame() {
+            timerSection.style.display = 'none';
+            gameSection.style.display = 'block';
+            resetGame();
+        }
+
+        function backToStudy() {
+            gameSection.style.display = 'none';
+            timerSection.style.display = 'block';
+        }
 
         function setMode(mode) {
             if (mode === 'one') {
@@ -481,7 +780,7 @@
                 twoPlayerBtn.classList.add('active');
                 onePlayerBtn.classList.remove('active');
             }
-            reset();
+            resetGame();
         }
 
         function handleCellClick(index) {
@@ -489,7 +788,6 @@
                 return;
             }
 
-            // In one player mode, only allow human player (X) to make moves via click
             if (gameMode === EGameMode.ONE_PLAYER && currentPlayer !== humanPlayer) {
                 return;
             }
@@ -511,9 +809,7 @@
             currentPlayer = currentPlayer === "X" ? "O" : "X";
             updateGameMessage();
 
-            // If it's one player mode and now it's computer's turn
             if (gameMode === EGameMode.ONE_PLAYER && currentPlayer === computerPlayer) {
-                // Add a small delay for better UX
                 setTimeout(() => {
                     makeComputerMove();
                 }, 500);
@@ -551,7 +847,6 @@
         }
 
         function getBestMove() {
-            // Get available moves
             const availableMoves = [];
             cells.forEach((cell, index) => {
                 if (cell.innerHTML === "") {
@@ -591,7 +886,6 @@
                 return availableCorners[Math.floor(Math.random() * availableCorners.length)];
             }
 
-            // Take any available move
             return availableMoves[Math.floor(Math.random() * availableMoves.length)];
         }
 
@@ -601,9 +895,9 @@
 
         function isWinningBoard(board, player) {
             const winPatterns = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
-                [0, 4, 8], [2, 4, 6], // diagonals
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6],
             ];
 
             return winPatterns.some(pattern => {
@@ -614,9 +908,9 @@
 
         function checkWinner() {
             const winPatterns = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
-                [0, 4, 8], [2, 4, 6], // diagonals
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6],
             ];
 
             for (const pattern of winPatterns) {
@@ -643,7 +937,7 @@
             return Array.from(cells).every((cell) => cell.innerHTML !== "");
         }
 
-        function reset() {
+        function resetGame() {
             gameStatus = EGameStatus.NOT_STARTED;
             currentPlayer = "X";
             updateGameMessage();
@@ -684,6 +978,7 @@
                    gameStatus === EGameStatus.FINISHED_WITH_WINNER;
         }
 
+        // Background Functions
         function changeBackground(bgNumber) {
             // Hide all video backgrounds
             document.querySelectorAll('.bg-video-wrapper').forEach(wrapper => {
